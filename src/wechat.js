@@ -586,8 +586,10 @@ class Wechat extends EventEmitter {
     data['AddMsgList'].forEach(msg => {
       this.Message.extend(msg)
 
-      let fromUser = this.Contact.getUserByUserName(msg.FromUserName).getDisplayName()
-
+      let fromUser = this.Contact.getUserByUserName(msg.FromUserName)
+      if (fromUser.getDisplayName) {
+        fromUser = fromUser.getDisplayName()
+      }
       switch (msg.MsgType) {
         case CONF.MSGTYPE_STATUSNOTIFY:
           debug(' Message: Init')
@@ -599,24 +601,15 @@ class Wechat extends EventEmitter {
           break
         case CONF.MSGTYPE_IMAGE:
           debug(' Image-Message: ', fromUser, ': ', msg.Content)
-          this._getMsgImg(msg.MsgId).then(image => {
-            msg.Content = image
-            this.emit('image-message', msg)
-          })
+          this.emit('image-message', msg)
           break
         case CONF.MSGTYPE_VOICE:
           debug(' Voice-Message: ', fromUser, ': ', msg.Content)
-          this._getVoice(msg.MsgId).then(voice => {
-            msg.Content = voice
-            this.emit('voice-message', msg)
-          })
+          this.emit('voice-message', msg)
           break
         case CONF.MSGTYPE_EMOTICON:
           debug(' Emoticon-Message: ', fromUser, ': ', msg.Content)
-          this._getEmoticon(msg.Content).then(emoticon => {
-            msg.Content = emoticon
-            this.emit('emoticon-message', msg)
-          })
+          this.emit('emoticon-message', msg)
           break
         case CONF.MSGTYPE_VERIFYMSG:
           debug(' Message: Add Friend')

@@ -1,0 +1,19 @@
+{
+  "BaseRequest": {
+    "Uin": 227923155,
+    "Sid": "cIFRDBptLDh1Yq1Z",
+    "Skey": "@crypt_87c350d8_35a4d9c3810c51f4540c1edbfc21c5f0",
+    "DeviceID": "e017703250944259"
+  },
+  "Msg": {
+    "Type": 6,
+    "Content": "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''><title>2.txt</title><des></des><action></action><type>6</type><content></content><url></url><lowurl></lowurl><appattach><totallen>237211</totallen><attachid>@crypt_82e78305_1629d708ef476bf6fe29ac7bab153727ef7c78119274b28ac8834d48fa2a1ab6eec68a6be6d367251c95b2d5bacad3ac9323f911fcf4b642c88ecb9a72bdfaeefb38ab0bdacf385d8fdfb600d6cf4ba0</attachid><fileext>txt</fileext></appattach><extinfo></extinfo></appmsg>",
+    "FromUserName": "@ff8e50aed880f27b79cad14a2ee0db9a",
+    "ToUserName": "filehelper",
+    "LocalID": "14699856899220767",
+    "ClientMsgId": "14699856899220767"
+  },
+  "Scene": 0
+}
+"<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''><title>webwxgetvoice.mp3</title><des></des><action></action><type>6</type><content></content><url></url><lowurl></lowurl><appattach><totallen>2050</totallen><attachid>@crypt_873df215_d2d1cfc58e082f80bfaf6b345490de5a18604dd54293a5b0c455da6520259094f4261c287155311419b118ad152b12661ac1d11099b9c856dd7a9ab3efa8bfec25339653d6ec02fdf90744ed3a1547b8</attachid><fileext>mp3</fileext></appattach><extinfo></extinfo></appmsg>"
+`<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''><title>${name}</title><des></des><action></action><type>6</type><content></content><url></url><lowurl></lowurl><appattach><totallen>${size}</totallen><attachid>${mediaId}</attachid><fileext>${ext}</fileext></appattach><extinfo></extinfo></appmsg>`
