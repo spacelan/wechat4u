@@ -5,19 +5,24 @@ import path from 'path'
 import _debug from 'debug'
 import FormData from 'form-data'
 import mime from 'mime'
-import {CONF, Request, updateAPI, isStandardBrowserEnv} from './util'
+import {
+  CONF,
+  Request,
+  updateAPI,
+  isStandardBrowserEnv
+} from './util'
 
 import ContactFactory from './interface/contact'
 import MessageFactory from './interface/message'
 
 const debug = _debug('wechat')
-// Private
+  // Private
 const PROP = Symbol()
 const API = Symbol()
 
 class Wechat extends EventEmitter {
 
-  constructor () {
+  constructor() {
     super()
     this[PROP] = {
       uuid: '',
@@ -58,16 +63,16 @@ class Wechat extends EventEmitter {
     this.request = new Request()
   }
 
-  setProp (key, val) {
+  setProp(key, val) {
     this[PROP][key] = val
   }
 
-  getProp (key) {
+  getProp(key) {
     return this[PROP][key]
   }
 
   // 通讯录好友
-  get friendList () {
+  get friendList() {
     let members = []
 
     this.groupList.forEach(member => {
@@ -91,7 +96,7 @@ class Wechat extends EventEmitter {
     return members
   }
 
-  getUUID () {
+  getUUID() {
     let params = {
       'appid': 'wx782c26e4c19acffb',
       'fun': 'new',
@@ -123,7 +128,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  checkScan () {
+  checkScan() {
     debug('CheckScan')
     let params = {
       'tip': 1,
@@ -148,7 +153,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  checkLogin () {
+  checkLogin() {
     let params = {
       'tip': 0,
       'uuid': this[PROP].uuid
@@ -179,7 +184,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  login () {
+  login() {
     return this.request({
       method: 'GET',
       url: this[API].rediUri
@@ -207,7 +212,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  init () {
+  init() {
     let params = {
       'pass_ticket': this[PROP].passTicket,
       'skey': this[PROP].skey,
@@ -236,7 +241,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  notifyMobile () {
+  notifyMobile() {
     let data = {
       'BaseRequest': this[PROP].baseRequest,
       'Code': 3,
@@ -259,7 +264,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  getContact () {
+  getContact() {
     let params = {
       'lang': 'zh_CN',
       'pass_ticket': this[PROP].passTicket,
@@ -304,7 +309,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  batchGetContact () {
+  batchGetContact() {
     let params = {
       'pass_ticket': this[PROP].passTicket,
       'type': 'e',
@@ -331,7 +336,9 @@ class Wechat extends EventEmitter {
 
       for (let group of contactList) {
         for (let member of group['MemberList']) {
-          this.Contact.extend(member, {baseUri: this[API].baseUri})
+          this.Contact.extend(member, {
+            baseUri: this[API].baseUri
+          })
           this.groupMemberList.push(member)
         }
       }
@@ -343,7 +350,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  syncPolling () {
+  syncPolling() {
     this._syncCheck().then(state => {
       if (state.retcode !== CONF.SYNCCHECK_RET_SUCCESS) {
         throw new Error('你登出了微信')
@@ -375,7 +382,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  logout () {
+  logout() {
     let params = {
       redirect: 1,
       type: 0,
@@ -403,7 +410,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  start () {
+  start() {
     return Promise.resolve(this.state === CONF.STATE.uuid ? 0 : this.getUUID())
       .then(() => this.checkScan())
       .then(() => this.checkLogin())
@@ -424,11 +431,11 @@ class Wechat extends EventEmitter {
       })
   }
 
-  stop () {
+  stop() {
     return this.state === CONF.STATE.login ? this.logout() : Promise.resolve()
   }
 
-  sendMsg (msg, to) {
+  sendMsg(msg, to) {
     let params = {
       'pass_ticket': this[PROP].passTicket
     }
@@ -521,7 +528,7 @@ class Wechat extends EventEmitter {
       })
   }
 
-  _syncCheck () {
+  _syncCheck() {
     let params = {
       'r': +new Date(),
       'sid': this[PROP].sid,
@@ -542,7 +549,8 @@ class Wechat extends EventEmitter {
       let selector = +pm[2]
 
       return {
-        retcode, selector
+        retcode,
+        selector
       }
     }).catch(err => {
       debug(err)
@@ -550,7 +558,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  _sync () {
+  _sync() {
     let params = {
       'sid': this[PROP].sid,
       'skey': this[PROP].skey,
@@ -580,15 +588,19 @@ class Wechat extends EventEmitter {
     })
   }
 
-  _handleMsg (data) {
+  _handleMsg(data) {
     debug('Receive ', data.AddMsgList.length, 'Message')
 
     data['AddMsgList'].forEach(msg => {
       this.Message.extend(msg)
 
-      let fromUser = this.Contact.getUserByUserName(msg.FromUserName)
-      if (fromUser.getDisplayName) {
-        fromUser = fromUser.getDisplayName()
+      let fromUser = this.Contact.getUserByUserName(msg.FromUserName) || msg.FromUserName
+      try {
+        if (fromUser.getDisplayName) {
+          fromUser = fromUser.getDisplayName()
+        }
+      } catch (err) {
+        debug(err)
       }
       switch (msg.MsgType) {
         case CONF.MSGTYPE_STATUSNOTIFY:
@@ -664,7 +676,7 @@ class Wechat extends EventEmitter {
     }
 
     let mediaId = this.mediaSend++
-    let clientMsgId = +new Date() + '0' + Math.random().toString().substring(2, 5)
+      let clientMsgId = +new Date() + '0' + Math.random().toString().substring(2, 5)
 
     let uploadMediaRequest = JSON.stringify({
       BaseRequest: this[PROP].baseRequest,
@@ -821,7 +833,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  _getMsgImg (msgId) {
+  _getMsgImg(msgId) {
     let params = {
       MsgID: msgId,
       skey: this[PROP].skey
@@ -843,7 +855,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  _getVoice (msgId) {
+  _getVoice(msgId) {
     let params = {
       MsgID: msgId,
       skey: this[PROP].skey
@@ -865,7 +877,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  _getEmoticon (content) {
+  _getEmoticon(content) {
     return Promise.resolve().then(() => {
       return this.request({
         method: 'GET',
@@ -884,7 +896,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  _getHeadImg (member) {
+  _getHeadImg(member) {
     let url = member.AvatarUrl ? member.AvatarUrl : this[API].baseUri.match(/http.*?\/\/.*?(?=\/)/)[0] + member.HeadImgUrl
     return this.request({
       method: 'GET',
@@ -903,7 +915,7 @@ class Wechat extends EventEmitter {
     })
   }
 
-  _updateSyncKey (syncKey) {
+  _updateSyncKey(syncKey) {
     this[PROP].syncKey = syncKey
     let synckeylist = []
     for (let e = this[PROP].syncKey['List'], o = 0, n = e.length; n > o; o++) {
