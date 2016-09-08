@@ -34,21 +34,34 @@ class WxBot extends Wechat {
 
     this.on('emoticon-message', msg => {
       if (msg.Content.indexOf('md5') >= 0) {
-        let instance = Emoticon()
+        let instance = new Emoticon()
         instance.FromUserName = msg.FromUserName
         instance.ToUserName = msg.ToUserName
         instance.CreateTime = new Date(msg.CreateTime * 1000)
         instance.Content = msg.Content
         instance.save()
         debug('new emoticon')
-        if (this.replyUsers.has(msg['FromUserName'])) {
-          this.sendEmoticon('0270c029bfb835242ed03c767adbe243', msg['FromUserName'])
-          setTimeout(() => {
-            this.sendEmoticon(msg.Content.match(/md5 ?= ?"(.*?)"/)[1], msg['FromUserName'])
-          }, 1000)
-          setTimeout(() => {
-            this.sendMsg('是吧[微笑]', msg['FromUserName'])
-          }, 2000)
+        let emoticonMd5 = msg.Content.match(/md5 ?= ?"(.*?)"/)[1]
+        let reg = new RegExp(emoticonMd5, 'i')
+        if (Emoticonthis.replyUsers.has(msg['FromUserName'])) {
+          Emoticon.findOne({
+            Content: reg
+          }, (err, doc) => {
+            if (!err && doc) {
+              this.sendMsg('然而这张图我已经有了[微笑]', msg['FromUserName'])
+              setTimeout(() => {
+                this.sendEmoticon('24ad78ef8b0913936305905a1d5164cb', msg['FromUserName'])
+              }, 500)
+            } else {
+              this.sendEmoticon('0270c029bfb835242ed03c767adbe243', msg['FromUserName'])
+              setTimeout(() => {
+                this.sendEmoticon(emoticonMd5, msg['FromUserName'])
+              }, 500)
+              setTimeout(() => {
+                this.sendMsg('是吧，么么扎[微笑]', msg['FromUserName'])
+              }, 1000)
+            }
+          })
         }
       }
     })
